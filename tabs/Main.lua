@@ -18,8 +18,8 @@ function setup()
 end
     
 local white = lpeg.S(" \t\r\n") ^ 0
---local integer = white * lpeg.R("09") ^ 1 * (("." * lpeg.R("09") ^ 1) ^ -1) / tonumber
-local integer = white * re.compile("[0-9]+([.][0-9]+)?") / tonumber
+--local number = white * lpeg.R("09") ^ 1 * (("." * lpeg.R("09") ^ 1) ^ -1) / tonumber
+local number = white * re.compile("[0-9]+([.][0-9]+)?") / tonumber
 local muldiv = white * lpeg.C(lpeg.S("/*"))
 local addsub = white * lpeg.C(lpeg.S("+-"))
 local OpenParen = white * lpeg.S("(")
@@ -30,7 +30,7 @@ local grammar = lpeg.P({
     input = lpeg.V("exp") * -1,
     exp = lpeg.Ct(lpeg.V("term") * (addsub * lpeg.V("term"))^1) + lpeg.V("term"),
     term = lpeg.Ct(lpeg.V("factor") * (muldiv * lpeg.V("factor"))^1) + lpeg.V("factor"),
-    factor = integer + OpenParen * lpeg.V("exp") * CloseParen,
+    factor = number + OpenParen * lpeg.V("exp") * CloseParen,
 })
 
 -- This function gets called once every frame
