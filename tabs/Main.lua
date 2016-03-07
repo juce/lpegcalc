@@ -7,7 +7,6 @@ local re = require("re")
 -- Use this function to perform your initial setup
 function setup()
     print("Lpeg Calculator")
-    
     expr, tree, res = "", "", ""
     parameter.action("edit", function()
         if not isKeyboardShowing() then
@@ -27,17 +26,22 @@ local muldiv = white * lpeg.C(lpeg.S("/*"))
 local addsub = white * lpeg.C(lpeg.S("+-"))
 local comma = white * lpeg.S(",")
 local ident = white * lpeg.C(re.compile("[a-z_][a-z_0-9]*"))
-local OpenParen = white * lpeg.S("(")
-local CloseParen = white * lpeg.S(")")
+local openParen = white * lpeg.S("(")
+local closeParen = white * lpeg.S(")")
+
+-- Non-terminals
+local Exp = lpeg.V("Exp")
+local Term = lpeg.V("Term")
+local Factor = lpeg.V("Factor")
+local Fcall = lpeg.V("Fcall")
 
 local grammar = lpeg.P({
     "input",
-    input = lpeg.V("exp") * -1,
-    exp = lpeg.Ct(lpeg.V("term") * (addsub * lpeg.V("term"))^1) + lpeg.V("term"),
-    term = lpeg.Ct(lpeg.V("factor") * (muldiv * lpeg.V("factor"))^1) + lpeg.V("factor"),
-    factor = number + lpeg.V("fcall") + OpenParen * lpeg.V("exp") * CloseParen,
-    fcall = lpeg.Ct(ident * OpenParen * 
-        (lpeg.V("exp") * (comma * lpeg.V("exp"))^0)^-1 * CloseParen),
+    input = Exp * -1,
+    Exp = lpeg.Ct(Term * (addsub * Term)^1) + Term,
+    Term = lpeg.Ct(Factor * (muldiv * Factor)^1) + Factor,
+    Factor = number + Fcall + openParen * Exp * closeParen,
+    Fcall = lpeg.Ct(ident * openParen * (Exp * (comma * Exp)^0)^-1 * closeParen),
 })
 
 -- This function gets called once every frame
